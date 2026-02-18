@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Minimal modern card styles — drop into static/style.css for permanence */
+    :root {
+      --bg: #f5f7fb;
+      --card-bg: #fff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --danger: #ef4444;
+      --glass: rgba(255,255,255,0.6);
+    }
+    body { font-family: Inter, system-ui, Arial; background: linear-gradient(180deg,#f3f6fb,#eef3ff); margin:0; color:#111 }
+    .container { max-width:1100px; margin:28px auto; padding:18px; }
+    .top-row { display:flex; gap:18px; align-items:center; justify-content:space-between; }
+    .title { font-size:20px; font-weight:700; color:#0f172a; }
+    .cards { display:flex; gap:18px; margin-top:18px; }
+    .card {
+      flex:1;
+      background: var(--card-bg);
+      padding:22px;
+      border-radius:14px;
+      box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+    }
+    .card h4 { margin:0; font-size:13px; color:var(--muted); }
+    .card .value { font-size:22px; font-weight:700; margin-top:8px; }
+    .ai-panel {
+      margin-top:20px;
+      display:flex;
+      gap:18px;
+    }
+    .ai-left { flex: 0 0 58%; background:var(--card-bg); padding:20px; border-radius:14px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+    .ai-right { flex:1; background:var(--card-bg); padding:20px; border-radius:14px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+    .ai-panel h3 { margin:0 0 10px 0; font-size:16px; }
+    .insight-list { list-style:none; padding:0; margin:0; }
+    .insight-list li { padding:10px 0; border-bottom:1px dashed #eef2ff}
+    .insight-meta { color:var(--muted); font-size:13px }
+    .small-muted { color:var(--muted); font-size:13px }
+
+    @media (max-width:900px){
+      .cards { flex-direction:column; }
+      .ai-panel { flex-direction:column; }
+    }
+  </style>
+</head>
+<body class="{{ settings['theme'] }}">
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-cloud-lightning icon'></i>
+        <div class="logo_name">Finance Management</div>
+        <i class='bx bx-menu' id="btn" ></i>
+        
+    </div>
+    <ul class="nav-list">
+      <li>
+          <i class='bx bx-search' id="srch"></i>
+         <input type="text" placeholder="Search..." class="inputt" id="sarch">
+         <span class="tooltip">Search</span>
+      </li>
+      <li>
+        <a href="/">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Dashboard</span>
+        </a>
+         <span class="tooltip">Dashboard</span>
+      </li>
+      <li>
+       <a href="#">
+         <i class='bx bx-user-circle' ></i>
+         <span class="links_name">User</span>
+       </a>
+       <span class="tooltip">User</span>
+     </li>
+     <li>
+       <a href="/notifications">
+         <i class='bx bx-bell'></i>
+         <span class="links_name">Notifications</span>
+       </a>
+       <span class="tooltip">Notifications</span>
+     </li>
+     <li>
+       <a href="/insights">
+         <i class='bx bx-bar-chart-alt-2' ></i>
+         <span class="links_name">Insights</span>
+       </a>
+       <span class="tooltip">Insights</span>
+     </li>
+     <li>
+       <a href="/expenses">
+         <i class='bx bx-dollar' ></i>
+         <span class="links_name">Expenses</span>
+       </a>
+       <span class="tooltip">Expenses</span>
+     </li>
+     <li>
+       <a href="/settings">
+         <i class='bx bx-cog' ></i>
+         <span class="links_name">Settings</span>
+       </a>
+       <span class="tooltip">Settings</span>
+     </li>
+         <li class="profile" id="profile">
+  <div class="profile-details" id="profile-details" style="gap:15px">
+    <i class="bx bxs-user-circle" id="last" style="font-size:60px;"></i>
+   <div class="name_job">
+      <div class="name">{{ settings['username'] or 'User' }}</div>
+      <div class="job">{{ settings['about'] or 'No info yet' }}</div>
+    </div>
+  </div>
+  <i class='bx bxs-user' id="log_out"></i>
+</li>
+    </ul>
+  </div>
+  <section class="home-section">
+  <div class="container">
+    <div class="top-row">
+      <div>
+        <div class="title">Finance Management</div>
+        <div class="small-muted">Hello, {{ settings['username'] if settings else 'User' }} — here's your financial snapshot.</div>
+      </div>
+      <div class="small-muted">Last updated: <span id="lastUpdated">now</span></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards">
+      <div class="card">
+        <h4>Total Budget</h4>
+        <div class="value"> {{ settings['currency'] if settings else '₨' }} {{ "%.2f"|format(total_budget) }}</div>
+        <div class="small-muted">Assigned across categories</div>
+      </div>
+      <div class="card">
+        <h4>Total Spent</h4>
+        <div class="value"> {{ settings['currency'] if settings else '₨' }} {{ "%.2f"|format(total_spent) }}</div>
+        <div class="small-muted">Sum of tracked expenses</div>
+      </div>
+      <div class="card">
+        <h4>Remaining</h4>
+        <div class="value"> {{ settings['currency'] if settings else '₨' }} {{ "%.2f"|format(remaining) }}</div>
+        <div class="small-muted">Keep eye on this value</div>
+      </div>
+    </div>
+
+    <!-- AI Insights Panel -->
+    <div class="ai-panel">
+      <div class="ai-left">
+        <h3>🤖 AI Insights</h3>
+        <div class="small-muted" style="margin-bottom:8px;">Smart, actionable suggestions based on recent trends.</div>
+
+        <ul class="insight-list">
+          {% for line in ai_insights.advice %}
+            <li>
+              <div>{{ line|safe }}</div>
+              <div class="insight-meta">Context: avg daily spend ₨{{ ai_insights.avg_daily_spend }} • predicted days left: {{ ai_insights.days_until_zero if ai_insights.days_until_zero is not none else 'N/A' }}</div>
+            </li>
+          {% endfor %}
+
+          {% for s in ai_insights.suggestions %}
+            <li>
+              <div>{{ s|safe }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="ai-right">
+        <h3>Category Health & Trends</h3>
+        <canvas id="catBar" height="200"></canvas>
+        <div style="margin-top:12px;">
+          <strong>Fastest growing:</strong>
+          {% if ai_insights.fastest_growing %}
+            <div>{{ ai_insights.fastest_growing.name }} — last7: ₨{{ ai_insights.fastest_growing.last7 }} vs prev7: ₨{{ ai_insights.fastest_growing.prev7 }}</div>
+          {% else %}
+            <div class="small-muted">No growth spikes detected this week</div>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:14px;">
+          <strong>Category health scores</strong>
+          <ul style="list-style:none;padding:0;margin:8px 0 0 0;">
+            {% for h in ai_insights.health_scores %}
+              <li style="padding:8px 0;border-bottom:1px solid #f1f5f9;">
+                <div><strong>{{ h.name }}</strong> — Score: {{ h.score }}/100</div>
+                <div class="small-muted">Remaining: {% if h.remaining_pct is not none %}{{ h.remaining_pct }}%{% else %}N/A{% endif %} • Assigned: ₨{{ "%.2f"|format(h.assigned) }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  let ai_insights = {};
+
+  try {
+    const el = document.getElementById("ai-insights-data");
+    ai_insights = JSON.parse(el?.textContent || "{}") || {};
+  } catch (err) {
+    console.error("AI Insights JSON Parse Error:", err);
+    ai_insights = {};
+  }
+
+  // Extract category data safely
+  const catData = ai_insights.category_bar || {};
+
+  const labels = Array.isArray(catData.labels) ? catData.labels : [];
+  const assigned = Array.isArray(catData.assigned) ? catData.assigned : [];
+  const spent = Array.isArray(catData.spent) ? catData.spent : [];
+
+  // Draw Chart
+  const canvas = document.getElementById('catBar');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+
+    if (window._catBarChart) window._catBarChart.destroy();
+
+    window._catBarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Assigned', data: assigned, backgroundColor: 'rgba(37,99,235,0.9)' },
+          { label: 'Spent', data: spent, backgroundColor: 'rgba(239,68,68,0.9)' }
+        ]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  }
+</script>
+
+
+<!-- embed ai_insights as pure JSON so JS can read it safely -->
+<script id="ai-insights-data" type="application/json">
+  {{ ai_insights|tojson|safe }}
+</script>
+</section>
+ <script>
+  let sidebar = document.querySelector(".sidebar");
+  let closeBtn = document.querySelector("#btn");
+  let searchBtn = document.querySelector(".bx-search");
+  closeBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+  searchBtn.addEventListener("click", ()=>{ 
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+ 
+  function menuBtnChange() {
+   if(sidebar.classList.contains("open")){
+     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the iocns class
+   }else {
+     closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
+   }
+  }
+  </script>
+</body>
+</html>

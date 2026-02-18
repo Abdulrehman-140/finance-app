@@ -1,0 +1,509 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins" , sans-serif;
+}
+.sidebar{
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 78px;
+  background: linear-gradient(135deg,#3A0064,#270066,#3A0064);
+  padding: 6px 14px;
+  border: 0.3px solid black;
+  z-index: 99;
+}
+.sidebar.open{
+  width: 250px;
+}
+.sidebar .logo-details{
+  height: 60px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.sidebar .logo-details .icon{
+  opacity: 0;
+}
+.sidebar .logo-details .logo_name{
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  opacity: 0;
+}
+.sidebar.open .logo-details .icon,
+.sidebar.open .logo-details .logo_name{
+  opacity: 100;
+}
+.sidebar .logo-details #btn{
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: 22px;
+  transition: all 0.4s ease;
+  font-size: 23px;
+  text-align: center;
+  cursor: pointer;
+}
+.sidebar.open .logo-details #btn{
+  text-align: right;
+  
+}
+.card{
+  background: rgb(240, 208, 162);
+}
+.sidebar i{
+  color: #fff;
+  height: 60px;
+  min-width: 50px;
+  font-size: 28px;
+  text-align: center;
+  line-height: 60px;
+}
+.sidebar .nav-list{
+  margin-top: 20px;
+  height: 100%;
+}
+.sidebar li{
+  position: relative;
+  margin: 8px 0;
+  list-style: none;
+}
+.sidebar li .tooltip{
+  position: absolute;
+  top: -20px;
+  left: calc(100% + 15px);
+  z-index: 3;
+  background: #fff;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: 0s;
+}
+.sidebar li:hover .tooltip{
+  opacity: 1;
+  pointer-events: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.sidebar.open li .tooltip{
+  display: none;
+}
+.sidebar input{
+  font-size: 15px;
+  color: #FFF;
+  font-weight: 400;
+  outline: none;
+  height: 50px;
+  width: 100%;
+  width: 50px;
+  border: none;
+  border-radius: 12px;
+  background: #1d1b31;
+}
+.sidebar.open input{
+  padding: 0 20px 0 50px;
+  width: 100%;
+}
+.sidebar .bx-search{
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: 22px;
+  background: #1d1b31;
+  color: #FFF;
+}
+.sidebar.open .bx-search:hover{
+  background: #1d1b31;
+  color: #FFF;
+}
+.sidebar .bx-search:hover{
+  background: #FFF;
+  color: #11101d;
+}
+.sidebar li a{
+  display: flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+  align-items: center;
+  text-decoration: none;
+  background: transparent;
+}
+.sidebar li a:hover{
+  background: #FFF;
+}
+.sidebar li a .links_name{
+  color: #fff;
+  font-size: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.input-container {
+            position: relative; /* Crucial: Sets the reference point for the absolutely positioned label */
+            width: 300px;
+            margin: 50px auto;
+        }
+
+        /* 2. Input styling */
+        .input-container input {
+            width: 100%;
+            padding: 15px 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            box-sizing: border-box; /* Ensures padding is inside the 100% width */
+            transition: border-color 0.2s;
+        }
+
+        /* 3. Label styling (initial position) */
+        .floating-label {
+            position: absolute;
+            top: 50%; /* Vertical center alignment */
+            left: 10px;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 16px;
+            pointer-events: none; /* Allows clicks to pass through to the input */
+            padding: 0 5px;
+        }
+
+        /* 4. The Magic: Move and shrink the label */
+
+        /* Trigger 1: When the input is focused (clicked into) */
+        .input-container input:focus + .floating-label,
+        /* Trigger 2: When the input has content (is NOT placeholder shown) */
+        .input-container input:not(:placeholder-shown) + .floating-label {
+            top: 0; /* Move label up to the top edge */
+            left: 8px;
+            transform: translateY(-50%); /* Center vertically on the border line */
+            font-size: 12px; /* Shrink the font size */
+            color: #000000; /* Highlight color for active state */
+            background-color: white; /* **Creates the "merged into top border" effect** */
+        }
+        
+        /* 5. Set focus color */
+        .input-container input:focus {
+            border-color: #0c0c0c;
+        }
+.sidebar.open li a .links_name{
+  opacity: 1;
+  pointer-events: auto;
+}
+.sidebar li a:hover .links_name,
+.sidebar li a:hover i{
+  transition: all 0.5s ease;
+  color: #11101D;
+}
+.sidebar li i{
+  height: 50px;
+  line-height: 50px;
+  font-size: 18px;
+  border-radius: 12px;
+}
+.sidebar li.profile{
+  position: fixed;
+  height: 60px;
+  width: 78px;
+  left: 0;
+  bottom: -8px;
+  padding: 10px 14px;
+  overflow: hidden;
+}
+.sidebar.open li.profile{
+  width: 250px;
+}
+.sidebar li .profile-details{
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.sidebar li img{
+  height: 45px;
+  width: 45px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 10px;
+}
+
+.sidebar li.profile .name,
+.sidebar li.profile .job{
+  font-size: 15px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+}
+.sidebar li.profile .job{
+  font-size: 12px;
+}
+.sidebar .profile #log_out{
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 60px;
+  line-height: 60px;
+  border-radius: 0px;
+}
+.sidebar.open .profile #log_out{
+  width: 50px;
+  background: none;
+}
+.home-section{
+  position: relative;
+  background: #ffffff;
+  min-height: 100vh;
+  top: 0;
+  left: 78px;
+  width: calc(100% - 78px);
+  z-index: 2;
+}
+.sidebar.open ~ .home-section{
+  left: 250px;
+  width: calc(100% - 250px);
+}
+.home-section .text{
+  display: inline-block;
+  color: #11101d;
+  font-size: 25px;
+  font-weight: 500;
+  margin: 18px
+}
+body.light .text {
+  color: rgb(0, 47, 255);font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; width:calc(100%); margin:0; text-align:center;height:66px;margin-top: 70px;margin-bottom:110px;}
+body.dark .text {
+  background: none;
+  color: rgb(0, 47, 255);font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; width:calc(100%); margin:0; text-align:center;height:66px;margin-top: 70px;margin-bottom:110px;}
+body.dark #log_out{
+background-color: #141414;
+}
+body.light #profile-details{
+  background-color: #1d1b31;
+}
+@media (max-width: 420px) {
+  .sidebar li .tooltip{
+    display: none;
+  }
+}
+
+body.light {
+  background: #ffffff;
+  color: #222;
+}
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark .sidebar{
+  background: #141414;
+}
+
+body.dark .sidebar li{
+  color: #4d4d4d;
+}
+body.dark .home-section{
+  background: #141414;
+  color: #fff;
+  border: 1px solid #333;
+}
+body.dark .add-cat,#bttt{
+  background-color: #1d1d1d;
+  color: white;
+}
+body.light #bttt{
+  background-color: white;
+  color: #ff0000;
+}
+body.light #bttt:hover{
+  background-color: #222;
+}
+body.dark #bttt{
+  background-color: black;
+  color: #ff0000;
+}
+body.dark #bttt:hover{
+  background-color: #ffffff;
+}
+body.dark #ex-table,#expenses-table{
+  background-color: #161616;
+  color: white;
+}
+body.light #expenses-table{
+  background-color: #ffffff;
+  color: black;
+}
+body.dark .editable:focus{
+  color:black
+}
+
+body.dark  .sidebar li a, .sidebar .bx-search,.sidebar input{
+  background-color: transparent;
+  }
+
+body.dark #name,#about{
+  background-color: #141414;
+  color: white;
+}
+body.light #about{
+  background-color: white;
+  color:black
+}
+body.dark #currency{
+  background-color: #141414;
+  color: white;
+}
+body.dark .settings{
+  background-color: #1d1d1d;
+}
+body.light .settings{
+  background-color: #eceef0;
+}
+
+body.dark #srch:hover{
+  background-color: #333;
+}
+.sidebar.open #log_out {
+  display: none;
+}
+.read {
+  background: #d3d3d3;
+}
+.unread {
+  background: #fff3cd;
+}
+body.dark #noti{
+  background-color: #333333;
+}
+body.light #markas{
+  color: black;
+}
+body.dark #markas{
+  color: white;
+}
+.card{
+  background: #ffffff;
+}
+body.dark .card{
+  background: #333;
+  border: #333;
+}
+body.dark .sidebar li a:hover{
+  background-color: white;
+  color: black;
+}
+body.light #sarch,.inputt{
+  background-color: transparent;
+  border-radius: 0px;
+}
+.sidebar.open .inputt{
+border-bottom: 1px solid white;
+}
+.sidebar.open #srch:hover{
+  color: white;
+}
+body.light #srch{
+  background-color: #350169;
+
+}
+body.light #log_out{
+  background-color: #350169;
+}
+.sidebar.open #srch{
+  border-radius: 0px;
+}
+body.light .sidebar #srch:hover{
+  background-color: white;
+  color: black
+}
+.sidebar.open #profile-details{
+  background: transparent;
+}
+body.dark .sidebar.open #srch{
+  background: #141414;
+  border-radius: 0;
+}
+body.dark .sidebar.open .inputt{
+  border-radius: 0px;
+  color: white;
+}
+body.light .sidebar.open #srch{
+  border-radius: 0px;
+}
+body.light .sidebar.open #srch:hover{
+  background-color: #350169;
+  color: white
+}
+body.dark #srch{
+  background: #141414;
+}
+body.dark #srch:hover{
+  background-color: white;
+  color: black;
+}
+.container { padding-left:18px; padding-right:18px; }
+body.light .card .value { color:#000000; }
+body.dark .card .value { color:#ffffff; }
+
+.ai-panel .ai-left h3, .ai-panel .ai-right h3 { font-weight:700; }
+body.light .title{
+  color: blue;
+}
+body.dark .title{
+  color: blue;
+}
+body.dark .small-muted{
+  color: white;
+}
+body.dark .ai-left{
+  background-color: #333;
+  color: white;
+}
+body.dark .ai-right{
+  background-color: #333;
+  color: white;
+}
+body.dark .insight-list li{
+  color: white;
+}
+body.light .add-cat{
+  background-color: #350169;
+}
+body.dark .add-cat{
+  background-color: #020102;
+  border: 0.1px solid white;
+}
+/* AI insights UI tweaks */
+.risk-bar { height:10px; border-radius:6px; background:#eef2ff; overflow:hidden; }
+.risk-fill { height:100%; border-radius:6px; transition:width .5s ease; }
+.badge { display:inline-block; padding:6px 10px; background:#eef2ff; border-radius:999px; margin-right:8px; font-size:13px }
+
+body.light .settings-button{
+  background-color: #270066 !important;
+  border-radius: 17px !important;
+  color: white;
+  background: linear-gradient((135deg,#550191,#47129b,#53008f)) !important;
+  background-size: 200% 200%;
+  border: none;
+}
+body.dark .settings-button{
+  border-radius: 17px !important;
+  color: white;
+  background: black !important;
+  background-size: 200% 200%;
+  border: 1px solid white;
+}

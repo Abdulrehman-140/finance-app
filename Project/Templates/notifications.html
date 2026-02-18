@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Notifications</title>
+  <link rel="stylesheet" href="/static/style.css">
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body  class="{{ settings['theme'] }}">
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-cloud-lightning icon'></i>
+        <div class="logo_name">Finance Management</div>
+        <i class='bx bx-menu' id="btn" ></i>
+        
+    </div>
+    <ul class="nav-list">
+      <li>
+         <i class='bx bx-search' id="srch"></i>
+         <input type="text" placeholder="Search" class="inputt" id="sarch">
+         <span class="tooltip">Search</span>
+      </li>
+      <li>
+        <a href="/">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Dashboard</span>
+        </a>
+         <span class="tooltip">Dashboard</span>
+      </li>
+      <li>
+       <a href="#">
+         <i class='bx bx-user-circle' ></i>
+         <span class="links_name">User</span>
+       </a>
+       <span class="tooltip">User</span>
+     </li>
+     <li>
+       <a href="/notifications">
+         <i class='bx bx-bell' ></i>
+         <span class="links_name">Notifications</span>
+       </a>
+       <span class="tooltip">Notifications</span>
+     </li>
+     <li>
+       <a href="/insights">
+         <i class='bx bx-bar-chart-alt-2' ></i>
+         <span class="links_name">Insights</span>
+       </a>
+       <span class="tooltip">Insights</span>
+     </li>
+     <li>
+       <a href="/expenses">
+         <i class='bx bx-dollar' ></i>
+         <span class="links_name">Expenses</span>
+       </a>
+       <span class="tooltip">Expenses</span>
+     </li>
+     <li>
+       <a href="/settings">
+         <i class='bx bx-cog' ></i>
+         <span class="links_name">Settings</span>
+       </a>
+       <span class="tooltip">Settings</span>
+     </li>
+<li class="profile" id="profile">
+  <div class="profile-details" id="profile-details" style="gap:15px">
+    <i class="bx bxs-user-circle" id="last" style="font-size:60px;"></i>
+   <div class="name_job">
+      <div class="name">{{ settings['username'] or 'User' }}</div>
+      <div class="job">{{ settings['about'] or 'No info yet' }}</div>
+    </div>
+  </div>
+  <i class='bx bxs-user' id="log_out"></i>
+</li>
+    </ul>
+  </div>
+  <section class="home-section">
+    <div style="padding:30px;">
+      <h2><i class="bx bx-chat"  style="padding:6px"></i>Notifications</h2>
+      {% if notifications %}
+        <ul style="list-style:none;padding:0;">
+          {% for n in notifications %}
+           <li class="{% if n['is_read'] %}read{% else %}unread{% endif %}" style="border-bottom: 1px solid black;" id="noti">
+              <strong>{{ n['message'] }}</strong><br>
+              <small class="notif-date">{{ n['date'] }}</small><br>
+              {% if not n['is_read'] %}
+                <a href="/mark_read/{{ n['id'] }}"id="markas">Mark as read</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <a href="/clear_notifications" style="color:red">Clear all</a>
+      {% else %}
+        <p>No notifications yet 🎉</p>
+      {% endif %}
+    </div>
+  </section>
+</body>
+<script>
+  let sidebar = document.querySelector(".sidebar");
+  let closeBtn = document.querySelector("#btn");
+  let searchBtn = document.querySelector(".bx-search");
+  let log = document.getElementById("log_out")
+  closeBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+  searchBtn.addEventListener("click", ()=>{ 
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+ 
+  function menuBtnChange() {
+   if(sidebar.classList.contains("open")){
+     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+   }else {
+     closeBtn.classList.replace("bx-menu-alt-right","bx-menu");
+   }
+  }
+  function LogBtnChange() {
+   if(sidebar.classList.contains("open")){
+     document.log.style.display="none"
+   }
+  }
+  </script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const dateEls = document.querySelectorAll(".notif-date");
+    dateEls.forEach(el => {
+      const utcDate = new Date(el.textContent.trim() + " UTC");
+
+      
+      const day = String(utcDate.getDate()).padStart(2, '0');
+      const month = String(utcDate.getMonth() + 1).padStart(2, '0');
+      const year = utcDate.getFullYear();
+      const weekday = utcDate.toLocaleString('en-US', { weekday: 'short' });
+
+      let hours = utcDate.getHours();
+      const minutes = String(utcDate.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+
+      const formatted = `${weekday}, ${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+      el.textContent = formatted;
+    });
+  });
+</script>
+
+
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>Expenses</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PFMS — Categories</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 25px;}
+    .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    h1 { margin:0; font-size:20px }
+    .add-cat { background:#2b6cb0; color:white; padding:8px 12px; border-radius:6px; border:none; cursor:pointer }
+    .table { width:100%; background:white; border-radius:8px; padding:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06) }
+    .row { display:grid; grid-template-columns: 40% 20% 20% 20%; gap:10px; padding:8px 6px; align-items:center; border-bottom:1px solid #eee; }
+    .row.header { font-weight:700; color:#444; background:#fafbfd; border-bottom:2px solid #e6eef8 }
+    .category-title { cursor:pointer; display:flex; align-items:center; gap:8px; }
+    .sub-list { padding-left:34px; margin-top:6px; margin-right:20px }
+    .sub-row { display:grid; grid-template-columns: 60% 20% 20%; gap:10px; padding:6px 4px; align-items:center;border-bottom: 1px solid white; }
+    .muted { color:#6b7280; font-size:13px }
+    .editable { padding:6px; border-radius:4px; min-height:22px }
+    .editable[contenteditable="true"]:focus { outline:2px solid #dbeafe; background:#fff }
+    .plus-btn { background:#e6f0ff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer }
+    .icon { cursor:pointer; padding:6px }
+    .small-btn { background:#f3f4f6; padding:6px 10px; border-radius:6px; border:none; cursor:pointer }
+    .actions { text-align:right; color:#9ca3af;margin-right:26px}
+    .empty { padding:24px; text-align:center; color:#6b7280 }
+    .danger { color:#b91c1c; cursor:pointer }
+  </style>
+</head>
+<body class="{{ settings['theme'] }}">
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-cloud-lightning icon'></i>
+        <div class="logo_name">Finance Management</div>
+        <i class='bx bx-menu' id="btn" ></i>
+        
+    </div>
+    <ul class="nav-list">
+      <li>
+          <i class='bx bx-search' id="srch"></i>
+         <input type="text" placeholder="Search..." class="inputt" id="sarch">
+         <span class="tooltip">Search</span>
+      </li>
+      <li>
+        <a href="/">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Dashboard</span>
+        </a>
+         <span class="tooltip">Dashboard</span>
+      </li>
+      <li>
+       <a href="#">
+         <i class='bx bx-user-circle' ></i>
+         <span class="links_name">User</span>
+       </a>
+       <span class="tooltip">User</span>
+     </li>
+     <li>
+       <a href="/notifications">
+         <i class='bx bx-bell'></i>
+         <span class="links_name">Notifications</span>
+       </a>
+       <span class="tooltip">Notifications</span>
+     </li>
+     <li>
+       <a href="/insights">
+         <i class='bx bx-bar-chart-alt-2' ></i>
+         <span class="links_name">Insights</span>
+       </a>
+       <span class="tooltip">Insights</span>
+     </li>
+     <li>
+       <a href="/expenses">
+         <i class='bx bx-dollar' ></i>
+         <span class="links_name">Expenses</span>
+       </a>
+       <span class="tooltip">Expenses</span>
+     </li>
+     <li>
+       <a href="/settings">
+         <i class='bx bx-cog' ></i>
+         <span class="links_name">Settings</span>
+       </a>
+       <span class="tooltip">Settings</span>
+     </li>
+         <li class="profile" id="profile">
+  <div class="profile-details" id="profile-details" style="gap:15px">
+    <i class="bx bxs-user-circle" id="last" style="font-size:60px;"></i>
+   <div class="name_job">
+      <div class="name">{{ settings['username'] or 'User' }}</div>
+      <div class="job">{{ settings['about'] or 'No info yet' }}</div>
+    </div>
+  </div>
+  <i class='bx bx-log-in' id="log_out"></i>
+</li>
+    </ul>
+  </div>
+  <section class="home-section">
+  <div class="toolbar">
+    <h1>Expenses</h1>
+    <form id="addCategoryForm" method="POST" action="/add_category">
+      <input type="text" name="name" placeholder="New category name" style="padding:6px;border-radius:6px;border:1px solid #ddd" />
+      <button class="add-cat" type="submit">+ Add Category</button>
+    </form>
+  </div>
+
+   <div class="table" id="ex-table">
+    <div class="row header" id="expenses-table">
+      <div>Category / Subcategory</div>
+      <div>Assigned {{ settings['currency'] }}</div>
+      <div>Remaining {{ settings['currency'] }}</div>
+      <div class="actions">Actions</div>
+    </div>
+
+    {% if grouped|length == 0 %}
+      <div class="empty">No categories yet. Add a category with the box above to get started.</div>
+    {% endif %}
+
+    <!-- Categories loop -->
+    {% for cat in grouped %}
+      <div class="row" style="margin-top:8px;" id="row-jd">
+        <div class="category-title" data-toggle-target="sublist-{{ cat.id }}">
+          <strong class="editable" data-type="category" data-id="{{ cat.id }}" data-field="name" contenteditable="true">{{ cat.name }}</strong>
+        </div>
+
+        <div>
+          <div class="editable" contenteditable="true"
+               data-type="category" data-id="{{ cat.id }}" data-field="assigned">
+            {{ "%.2f"|format(cat.assigned) }}
+          </div>
+        </div>
+
+        <div id="remaining-{{ cat.id }}">{{ "%.2f"|format(cat.remaining) }}</div>
+
+        <div class="actions">
+          <!-- data attribute instead of inline onclick -->
+          <button type="button" class="small-btn delete-cat-btn" data-cat-id="{{ cat.id }}" id="bttt"><i class="bx bx-trash"></i></button>
+        </div>
+      </div>
+
+      <!-- sub-list (hidden by default) -->
+      <div id="sublist-{{ cat.id }}" class="sub-list" style="display:none; margin-bottom:6px;">
+        {% for s in cat.subcategories %}
+          <div class="sub-row" id="sub-{{ s.id }}">
+            <div contenteditable="true" class="editable"
+                 data-type="subcategory" data-id="{{ s.id }}" data-field="name">{{ s.name }}</div>
+            <div contenteditable="true" class="editable"
+                 data-type="subcategory" data-id="{{ s.id }}" data-field="amount"> {{ "%.2f"|format(s.amount) }} </div>
+            <div style="text-align:right;">
+              <!-- data attribute instead of inline onclick -->
+              <button type="button" id="bttt" class="small-btn delete-sub-btn" data-sub-id="{{ s.id }}"><i class="bx bx-trash"></i></button>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- add-sub row (plus button uses data-cat-id) -->
+        <div class="sub-row" style="margin-top:8px;">
+          <div>
+            <input type="text" id="new-name-{{ cat.id }}" placeholder="New subcategory name" style="width:95%; padding:6px; border-radius:6px; border:1px solid #ddd" />
+          </div>
+          <div>
+            <input type="number" id="new-amount-{{ cat.id }}" placeholder="0" style="width:95%; padding:6px; border-radius:6px; border:1px solid #ddd" />
+          </div>
+          <div style="text-align:right;">
+            <!-- data attribute instead of inline onclick -->
+            <button type="button" class="plus-btn add-sub-btn" data-cat-id="{{ cat.id }}">+ Add</button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+<script>
+/* Toggle display of sublist via data-toggle-target attribute */
+document.addEventListener('click', function(e){
+  const t = e.target;
+  // If clicked inside the category-title (or its children)
+  const title = t.closest('[data-toggle-target]');
+  if (title) {
+    const targetId = title.getAttribute('data-toggle-target');
+    const el = document.getElementById(targetId);
+    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+
+document.addEventListener('focusout', function(e){
+  const t = e.target;
+  if (!t.dataset) return;
+  const type = t.dataset.type;
+  const id = t.dataset.id;
+  const field = t.dataset.field;
+  if (!type || !id || !field) return;
+
+  let value = t.innerText.trim();
+  // For numeric fields, allow comma or spaces removal
+  if (field === 'amount' || field === 'assigned') {
+    value = value.replace(/{{ settings['currency'] }}/g, '') || '0';
+  }
+  // send update
+  fetch('/update', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({type: type, id: parseInt(id), field: field, value: value})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) {
+      alert('Update failed');
+      return;
+    }
+    // update the remaining display for this category
+    const cat = data.category;
+    if (cat && cat.id) {
+      const rem = document.getElementById('remaining-' + cat.id);
+      if (rem) rem.innerText = cat.remaining.toFixed(2);
+      // also update sub rows amounts if changed server-side
+      if (cat.subcategories) {
+        cat.subcategories.forEach(s => {
+          const subRow = document.getElementById('sub-' + s.id);
+          if (subRow) {
+            const amountCell = subRow.querySelector('[data-field="amount"]');
+            if (amountCell) amountCell.innerText = parseFloat(s.amount).toFixed(2);
+          }
+        });
+      }
+      // also update dashboard totals if present on this page
+      if (typeof updateTotals === 'function') updateTotals();
+    }
+  })
+  .catch(err => console.error(err));
+});
+
+/* Helper to POST form-like body for add-sub */
+async function postForm(url, formData) {
+  const res = await fetch(url, { method: 'POST', body: formData });
+  return res.json();
+}
+
+/* Add subcategory: using data-cat-id listeners */
+function initAddSubButtons() {
+  document.querySelectorAll('.add-sub-btn').forEach(btn => {
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const catId = this.getAttribute('data-cat-id');
+      const nameEl = document.getElementById('new-name-' + catId);
+      const amountEl = document.getElementById('new-amount-' + catId);
+      const name = nameEl ? nameEl.value.trim() : '';
+      const amount = amountEl ? (amountEl.value || '0') : '0';
+      const form = new FormData();
+      form.append('name', name);
+      form.append('amount', amount);
+      postForm('/add_subcategory/' + catId, form)
+        .then(data => {
+          if (!data.success) { alert('Failed to add'); return; }
+          const sub = data.subcategory;
+          const container = document.getElementById('sublist-' + catId);
+          if (!container) return;
+          const div = document.createElement('div');
+          div.className = 'sub-row';
+          div.id = 'sub-' + sub.id;
+          div.innerHTML = `
+            <div contenteditable="true" class="editable" data-type="subcategory" data-id="${sub.id}" data-field="name">${sub.name}</div>
+            <div contenteditable="true" class="editable" data-type="subcategory" data-id="${sub.id}" data-field="amount">${parseFloat(sub.amount).toFixed(2)}</div>
+            <div style="text-align:right;"><button type="button" class="small-btn delete-sub-btn" data-sub-id="${sub.id}">🗑️</button></div>
+          `;
+          // insert before the last sub-row (the add-row)
+          const subRows = container.querySelectorAll('.sub-row');
+          if (subRows.length > 0) {
+            container.insertBefore(div, subRows[subRows.length - 1]);
+          } else {
+            container.appendChild(div);
+          }
+          if (nameEl) nameEl.value = '';
+          if (amountEl) amountEl.value = '';
+          // re-init delete listeners for the new row
+          initDeleteSubButtons();
+          // update remaining
+          if (data.category) {
+            const rem = document.getElementById('remaining-' + data.category.id);
+            if (rem) rem.innerText = data.category.remaining.toFixed(2);
+          }
+          if (typeof updateTotals === 'function') updateTotals();
+        })
+        .catch(err => console.error(err));
+    });
+  });
+}
+
+/* Delete subcategory: attach listeners to buttons */
+function initDeleteSubButtons() {
+  document.querySelectorAll('.delete-sub-btn').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const subId = this.getAttribute('data-sub-id');
+      if (!confirm('Delete this sub-item?')) return;
+      fetch('/delete_sub/' + subId, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) { alert('Delete failed'); return; }
+          const el = document.getElementById('sub-' + subId);
+          if (el) el.remove();
+          if (data.category) {
+            const rem = document.getElementById('remaining-' + data.category.id);
+            if (rem) rem.innerText = parseFloat(data.category.remaining).toFixed(2);
+          }
+          if (typeof updateTotals === 'function') updateTotals();
+        })
+        .catch(err => console.error(err));
+    };
+  });
+}
+
+/* Delete category: attach listeners */
+function initDeleteCategoryButtons() {
+  document.querySelectorAll('.delete-cat-btn').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const catId = this.getAttribute('data-cat-id');
+      if (!confirm('Delete category and all its subitems?')) return;
+      fetch('/delete_cat/' + catId, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) { alert('Delete failed'); return; }
+          location.reload();
+        })
+        .catch(err => console.error(err));
+    };
+  });
+}
+
+/* Initialization on DOM ready */
+document.addEventListener('DOMContentLoaded', function(){
+  initAddSubButtons();
+  initDeleteSubButtons();
+  initDeleteCategoryButtons();
+});
+</script>
+
+ <script>
+  let sidebar = document.querySelector(".sidebar");
+  let closeBtn = document.querySelector("#btn");
+  let searchBtn = document.querySelector(".bx-search");
+  closeBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+  searchBtn.addEventListener("click", ()=>{ 
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+ 
+  function menuBtnChange() {
+   if(sidebar.classList.contains("open")){
+     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the iocns class
+   }else {
+     closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
+   }
+  }
+  </script>
+</body>
+</html>

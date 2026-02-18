@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Insights — AI Advisor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/style.css">
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .wrap { max-width:1100px; margin:24px auto; padding:16px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:12px }
+    .cards { display:flex; gap:12px; margin-top:18px; }
+    .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 6px 18px rgba(10,20,40,0.06); flex:1 }
+    .ai-title { font-weight:700; margin-bottom:8px }
+    .risk-bar { height:10px; border-radius:6px; background:#e6eefc; overflow:hidden }
+    .risk-fill { height:100%; border-radius:6px; }
+    .badge { display:inline-block; padding:6px 10px; background:#eef2ff; border-radius:999px; margin-right:8px; font-size:13px }
+    .muted { color:#6b7280; font-size:13px }
+    @media (max-width:900px){ .cards { flex-direction:column } }
+  </style>
+</head>
+<body class="{{ settings['theme'] if settings else 'light' }}">
+  <div class="wrap">
+    <div class="top">
+      <h2>AI Insights — Advisor</h2>
+      <div>
+        {% if settings %}
+          <span class="muted">Hello, {{ settings['username'] }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div id="ai-data" type="application/json" style="display:none">
+      {{ ai_insights|tojson|safe }}
+    </div>
+
+    <div class="cards" style="align-items:flex-start">
+      <div class="card" style="flex:0 0 62%;">
+        <div class="ai-title">📊 Category Overview</div>
+        <canvas id="categoryChart" height="150"></canvas>
+
+        <div style="margin-top:12px;">
+          <strong>Fastest growing:</strong>
+          <div id="fastest" class="muted">loading...</div>
+        </div>
+      </div>
+
+      <div class="card" style="flex:1;">
+        <div class="ai-title">💡 Recommendations</div>
+        <div id="warns"></div>
+
+        <div style="margin-top:10px;">
+          <div class="ai-title" style="font-size:14px">🏷 Badges</div>
+          <div id="badges"></div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="ai-title" style="font-size:14px">🔮 Prediction</div>
+          <div id="prediction" class="muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+      <!-- per-category risk meters -->
+      <div style="flex:1;">
+        <div class="ai-title">Category Risk Meters</div>
+        <div id="riskMeters"></div>
+      </div>
+
+      <div style="flex:1;">
+        <div class="ai-title">Recommendations & Warnings</div>
+        <div id="advice"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // read JSON embedded safely
+  let ai_raw = {};
+  try {
+    const el = document.getElementById('ai-data');
+    ai_raw = JSON.parse(el ? el.textContent : '{}') || {};
+  } catch (e) {
+    console.error("Failed to parse ai_insights JSON:", e);
+    ai_raw = {};
+  }
+
+  // category bar chart
+  const cat = ai_raw.category_bar || {labels:[], assigned:[], spent:[]};
+  const labels = cat.labels || [];
+  const assigned = cat.assigned || [];
+  const spent = cat.spent || [];
+
+  const ctx = document.getElementById('categoryChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Assigned', data: assigned, backgroundColor: 'rgba(37,99,235,0.9)' },
+          { label: 'Spent', data: spent, backgroundColor: 'rgba(239,68,68,0.85)' }
+        ]
+      },
+      options: { responsive:true, scales:{ y:{ beginAtZero:true } }, plugins:{legend:{position:'bottom'}} }
+    });
+  }
+
+  // fastest growing
+  const fastest = ai_raw.fastest_growing;
+  const fastestEl = document.getElementById('fastest');
+  if (fastest) {
+    fastestEl.innerHTML = `${fastest.name} — last7: ₨${fastest.growth_last7 || fastest.last7 || 0} vs prev7: ₨${fastest.growth_prev7 || fastest.prev7 || 0}`;
+  } else {
+    fastestEl.innerHTML = 'No significant spikes this week';
+  }
+
+  // badges
+  const badgesEl = document.getElementById('badges');
+  (ai_raw.badges || []).forEach(b=>{
+    const s = document.createElement('span');
+    s.className = 'badge';
+    s.innerText = b;
+    badgesEl.appendChild(s);
+  });
+
+  // prediction
+  const predEl = document.getElementById('prediction');
+  if (ai_raw.days_until_zero !== null && ai_raw.days_until_zero !== undefined) {
+    predEl.innerHTML = `Estimated days until funds run out: <strong>${ai_raw.days_until_zero}</strong> (based on 30-day avg)`;
+  } else {
+    predEl.innerHTML = 'Not enough history to predict days until zero.';
+  }
+
+  // warnings & recommendations
+  const warnsEl = document.getElementById('warns');
+  (ai_raw.warnings || []).forEach(w=>{
+    const p = document.createElement('div');
+    p.style.color = '#b91c1c';
+    p.style.marginBottom = '8px';
+    p.innerText = `⚠️ ${w}`;
+    warnsEl.appendChild(p);
+  });
+  (ai_raw.recommendations || []).forEach(r=>{
+    const p = document.createElement('div');
+    p.style.color = '#0b74d1';
+    p.style.marginBottom = '8px';
+    p.innerText = `💡 ${r}`;
+    warnsEl.appendChild(p);
+  });
+
+  // per-category risk meters and advice
+  const riskEl = document.getElementById('riskMeters');
+  const adviceEl = document.getElementById('advice');
+  (ai_raw.categories || []).forEach(c=>{
+    // meter row
+    const row = document.createElement('div');
+    row.style.marginBottom = '10px';
+
+    const title = document.createElement('div');
+    title.innerHTML = `<strong>${c.name}</strong> • ${c.remaining_pct !== null ? c.remaining_pct + '%' : 'N/A'} remaining • Score ${c.risk_score}/100`;
+    row.appendChild(title);
+
+    const bar = document.createElement('div');
+    bar.className = 'risk-bar';
+    bar.style.marginTop = '6px';
+    const fill = document.createElement('div');
+    fill.className = 'risk-fill';
+    // color by score: green >70, yellow 40-70, red below 40
+    let color = '#34d399';
+    if (c.risk_score <= 40) color = '#ef4444';
+    else if (c.risk_score <= 70) color = '#f59e0b';
+    fill.style.background = color;
+    fill.style.width = (c.risk_score) + '%';
+    bar.appendChild(fill);
+    row.appendChild(bar);
+
+    riskEl.appendChild(row);
+
+    // advice block
+    const adv = document.createElement('div');
+    adv.style.marginBottom = '8px';
+    adv.innerHTML = `<div style="font-size:13px;color:#374151">• ${c.name}: spent ₨${c.spent} / assigned ₨${c.assigned} — ${c.remaining !== undefined ? 'remaining ₨'+c.remaining : ''}</div>`;
+    adviceEl.appendChild(adv);
+  });
+</script>
+</body>
+</html>

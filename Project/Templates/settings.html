@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings</title>
+   <link rel="stylesheet" href="static/style.css">
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="{{ settings['theme'] }}">
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-cloud-lightning icon'></i>
+        <div class="logo_name">Finance Management</div>
+        <i class='bx bx-menu' id="btn" ></i>
+        
+    </div>
+    <ul class="nav-list">
+      <li>
+          <i class='bx bx-search' id="srch"></i>
+         <input type="text" placeholder="Search..." class="inputt" id="sarch">
+         <span class="tooltip">Search</span>
+      </li>
+      <li>
+        <a href="/">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Dashboard</span>
+        </a>
+         <span class="tooltip">Dashboard</span>
+      </li>
+      <li>
+       <a href="#">
+         <i class='bx bx-user-circle' ></i>
+         <span class="links_name">User</span>
+       </a>
+       <span class="tooltip">User</span>
+     </li>
+     <li>
+       <a href="/notifications">
+         <i class='bx bx-bell'></i>
+         <span class="links_name">Notifications</span>
+       </a>
+       <span class="tooltip">Notifications</span>
+     </li>
+     <li>
+       <a href="/insights">
+         <i class='bx bx-bar-chart-alt-2' ></i>
+         <span class="links_name">Insights</span>
+       </a>
+       <span class="tooltip">Insights</span>
+     </li>
+     <li>
+       <a href="/expenses">
+         <i class='bx bx-dollar' ></i>
+         <span class="links_name">Expenses</span>
+       </a>
+       <span class="tooltip">Expenses</span>
+     </li>
+     <li>
+       <a href="/settings">
+         <i class='bx bx-cog' ></i>
+         <span class="links_name">Settings</span>
+       </a>
+       <span class="tooltip">Settings</span>
+     </li>
+<li class="profile" id="profile">
+  <div class="profile-details" id="profile-details" style="gap:15px">
+    <i class="bx bxs-user-circle" id="last" style="font-size:60px;"></i>
+    <div class="name_job">
+      <div class="name">{{ settings['username'] or 'User' }}</div>
+      <div class="job">{{ settings['about'] or 'No info yet' }}</div>
+    </div>
+  </div>
+  <i class='bx bxs-user' id="log_out"></i>
+</li>
+    </ul>
+  </div>
+  <section class="home-section">
+  <div class="container"  style="display: flex;flex-flow:column;align-items: center">
+    <form method="POST" style="display: flex;justify-content:center;flex-flow:column;align-items: center;margin-top:100px;border-radius:8px; width:calc(100%);margin-top:0px;" class="settings">
+      <div>
+      <h2 style="margin-top:10px"><i class="bx bx-cog" style="width:20px"></i> Settings</h2>
+     </div>
+  <!-- Username -->
+  <div class="input-container">
+    <input type="text" name="username" value="{{ settings['username'] }}" id="name" placeholder=" " required>
+    <label for="username" class="floating-label">Username:</label>
+  </div>
+  
+  <div class="input-container">
+  <input type="text" name="about" value="{{ settings['about'] }}" id="about" placeholder=" " required>
+  <label for="about" class="floating-label">Tell us about yourself:</label>
+</div>
+  <!-- Currency -->
+  <div class="input-container">
+    <input type="text" name="currency" value="{{ settings['currency'] }}" maxlength="3" id="currency" placeholder=" " required>
+    <label for="currency" class="floating-label">Currency Symbol:</label>
+  </div>
+
+  <!-- Theme -->
+  <div>
+    <i class="bx bx-sun"></i>
+    <label>Theme (Light/Dark):</label><br>
+
+    <input type="radio" id="light" name="theme" value="light" style="accent-color: black;margin-left:40px;"
+      {% if settings and settings['theme'] == 'light' %}checked{% endif %}>
+    <label for="light"></label>
+
+    <input type="radio" id="dark" name="theme" value="dark" style="accent-color: black;"
+      {% if settings and settings['theme'] == 'dark' %}checked{% endif %}>
+    <label for="dark"></label>
+  </div>
+
+  <br><br>
+  <div style="display:flex;gap:20px;margin-bottom: 20px;">
+    <button type="button" id="cancelBtn" style="border-radius:29px;cursor:pointer;width:150px;height:50px;" class="settings-button">Cancel</button>
+    <button type="submit" style="border-radius:29px;width:150px;height:50px;" class="settings-button">Save</button>
+  </div>
+</form>
+  </div>
+</body>
+</section>
+ <script>
+  let sidebar = document.querySelector(".sidebar");
+  let closeBtn = document.querySelector("#btn");
+  let searchBtn = document.querySelector(".bx-search");
+  closeBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+  searchBtn.addEventListener("click", ()=>{ 
+    sidebar.classList.toggle("open");
+    menuBtnChange();
+  });
+ 
+  function menuBtnChange() {
+   if(sidebar.classList.contains("open")){
+     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the iocns class
+   }else {
+     closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
+   }
+  }
+  </script>
+ 
+<script>
+  const body = document.body;
+
+  document.getElementById("cancelBtn").addEventListener("click", function(event) {
+    event.preventDefault(); // prevent accidental form submit
+
+    // Reset text inputs
+    document.getElementById("name").value = "";
+    document.getElementById("currency").value = "";
+
+    // Reset radio buttons
+    document.getElementById("light").checked = true;
+    document.getElementById("dark").checked = false;
+
+    // Instantly switch visual theme (optional but satisfying)
+    body.classList.remove("dark-theme");
+    body.classList.add("light-theme");
+
+    // If your theme is controlled via CSS variables:
+    document.documentElement.setAttribute('data-theme', 'light');
+
+    console.log("Theme reset to light 🌞 and inputs cleared!");
+  });
+</script>
+
+</html>
